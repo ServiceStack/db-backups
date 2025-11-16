@@ -1,0 +1,37 @@
+{
+  "name": "db-backups",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:migrate": "bun run src/lib/db/migrate.ts"
+  },
+  "dependencies": {
+    "next": "^15.0.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hook-form": "^7.53.0",
+    "zod": "^3.23.8",
+    "@hookform/resolvers": "^3.9.0",
+    "date-fns": "^4.1.0",
+    "node-cron": "^3.0.3",
+    "@aws-sdk/client-s3": "^3.668.0",
+    "@aws-sdk/lib-storage": "^3.668.0",
+    "winston": "^3.15.0",
+    "nanoid": "^5.0.8",
+    "clsx": "^2.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.8.6",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/node-cron": "^3.0.11",
+    "typescript": "^5.6.3",
+    "tailwindcss": "^4.0.0-alpha.30",
+    "eslint": "^9.14.0",
+    "eslint-config-next": "^15.0.3"
+  }
+}
