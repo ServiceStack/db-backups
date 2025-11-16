@@ -842,28 +842,28 @@ backups/myapp_db/2025/11/myapp_db_daily_20251116_143022.sql.gz
 │ DB Backup & Restore                    [Settings]   │
 ├─────────────────────────────────────────────────────┤
 │                                                     │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐         │
-│  │ Total    │  │ Last 24h │  │ Failed   │         │
-│  │ Backups  │  │ Backups  │  │ Backups  │         │
-│  │  1,234   │  │    24    │  │    0     │         │
-│  └──────────┘  └──────────┘  └──────────┘         │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐           │
+│  │ Total    │  │ Last 24h │  │ Failed   │           │
+│  │ Backups  │  │ Backups  │  │ Backups  │           │
+│  │  1,234   │  │    24    │  │    0     │           │
+│  └──────────┘  └──────────┘  └──────────┘           │
 │                                                     │
 │  Recent Backups                                     │
-│  ┌───────────────────────────────────────────────┐ │
-│  │ Database    Type    Status    Size    Time    │ │
-│  │ myapp_db    Daily   ✓         1.2GB   2m 15s  │ │
-│  │ users_db    Hourly  ✓         234MB   45s     │ │
-│  └───────────────────────────────────────────────┘ │
+│  ┌───────────────────────────────────────────────┐  │
+│  │ Database    Type    Status    Size    Time    │  │
+│  │ myapp_db    Daily   ✓         1.2GB   2m 15s  │  │
+│  │ users_db    Hourly  ✓         234MB   45s     │  │
+│  └───────────────────────────────────────────────┘  │
 │                                                     │
 │  Upcoming Schedules                                 │
-│  ┌───────────────────────────────────────────────┐ │
-│  │ Database    Type      Next Run                │ │
-│  │ myapp_db    Daily     in 4 hours               │ │
-│  │ users_db    Hourly    in 23 minutes            │ │
-│  └───────────────────────────────────────────────┘ │
+│  ┌───────────────────────────────────────────────┐  │
+│  │ Database    Type      Next Run                │  │
+│  │ myapp_db    Daily     in 4 hours              │  │
+│  │ users_db    Hourly    in 23 minutes           │  │
+│  └───────────────────────────────────────────────┘  │
 │                                                     │
 │  Quick Actions                                      │
-│  [+ Add Database] [+ Create Schedule] [⟳ Restore]  │
+│  [+ Add Database] [+ Create Schedule] [⟳ Restore]   │
 │                                                     │
 └─────────────────────────────────────────────────────┘
 ```
@@ -893,7 +893,7 @@ backups/myapp_db/2025/11/myapp_db_daily_20251116_143022.sql.gz
 │ Last Backup: 2 hours ago               │
 │ Next Backup: in 22 hours               │
 │                                        │
-│ [Test] [Backup Now] [View] [Edit]     │
+│ [Test] [Backup Now] [View] [Edit]      │
 └────────────────────────────────────────┘
 ```
 
@@ -974,7 +974,7 @@ backups/myapp_db/2025/11/myapp_db_daily_20251116_143022.sql.gz
 │ [Select database ▼]                     │
 │                                         │
 │ Schedule Type:                          │
-│ ( ) Hourly  ( ) Daily  ( ) Weekly      │
+│ ( ) Hourly  ( ) Daily  ( ) Weekly       │
 │ ( ) Monthly (•) Custom                  │
 │                                         │
 │ Cron Expression:                        │
@@ -982,10 +982,10 @@ backups/myapp_db/2025/11/myapp_db_daily_20251116_143022.sql.gz
 │ Next 5 runs: ...                        │
 │                                         │
 │ Retention Policy:                       │
-│ [Standard (24h/7d/4w/12m) ▼]           │
+│ [Standard (24h/7d/4w/12m) ▼]            │
 │                                         │
 │ S3 Upload: [✓] Enable                   │
-│ S3 Config: [Default S3 ▼]              │
+│ S3 Config: [Default S3 ▼]               │
 │                                         │
 │         [Cancel] [Save Schedule]        │
 └─────────────────────────────────────────┘
@@ -999,34 +999,34 @@ backups/myapp_db/2025/11/myapp_db_daily_20251116_143022.sql.gz
 │ ← Back to Backups                                   │
 │                                                     │
 │ Backup Details                                      │
-│ myapp_db - Daily Backup                            │
-│ November 16, 2025 at 2:00 AM                       │
+│ myapp_db - Daily Backup                             │
+│ November 16, 2025 at 2:00 AM                        │
 │                                                     │
 │ Status: ✓ Completed                                 │
 │ Duration: 2m 15s                                    │
 │ File Size: 1.2 GB                                   │
 │ Compression: gzip                                   │
-│ Checksum: sha256:abc123...                         │
+│ Checksum: sha256:abc123...                          │
 │                                                     │
 │ S3 Details:                                         │
 │ Uploaded: ✓ Yes                                     │
 │ Bucket: my-backups                                  │
-│ Key: backups/myapp_db/2025/11/...                  │
-│ Upload Time: 2:02 AM (45s)                         │
+│ Key: backups/myapp_db/2025/11/...                   │
+│ Upload Time: 2:02 AM (45s)                          │
 │                                                     │
 │ Actions:                                            │
-│ [Download] [Restore] [Delete]                      │
+│ [Download] [Restore] [Delete]                       │
 │                                                     │
 │ Execution Logs:                                     │
-│ ┌─────────────────────────────────────────────┐   │
-│ │ [INFO] Starting backup process...           │   │
-│ │ [INFO] Connected to database                │   │
-│ │ [INFO] Executing pg_dump...                 │   │
-│ │ [INFO] Backup completed successfully        │   │
-│ │ [INFO] Compressing backup file...           │   │
-│ │ [INFO] Uploading to S3...                   │   │
-│ │ [INFO] Upload completed                     │   │
-│ └─────────────────────────────────────────────┘   │
+│ ┌─────────────────────────────────────────────┐     │
+│ │ [INFO] Starting backup process...           │     │
+│ │ [INFO] Connected to database                │     │
+│ │ [INFO] Executing pg_dump...                 │     │
+│ │ [INFO] Backup completed successfully        │     │
+│ │ [INFO] Compressing backup file...           │     │
+│ │ [INFO] Uploading to S3...                   │     │
+│ │ [INFO] Upload completed                     │     │
+│ └─────────────────────────────────────────────┘     │
 │                                                     │
 └─────────────────────────────────────────────────────┘
 ```
