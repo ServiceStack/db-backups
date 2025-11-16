@@ -53,9 +53,9 @@ A containerized web application built with Bun runtime that provides automated b
 ### 2.1 High-Level Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    Docker Compose Stack                  │
-│                                                          │
+┌────────────────────────────────────────────────────────┐
+│                    Docker Compose Stack                │
+│                                                        │
 │  ┌──────────────┐         ┌─────────────────────────┐  │
 │  │ PostgreSQL   │         │  DB Backup Web App      │  │
 │  │ Container    │◄────────┤                         │  │
@@ -77,8 +77,8 @@ A containerized web application built with Bun runtime that provides automated b
 │                           │  │ (Logs & Config)  │   │  │
 │                           │  └──────────────────┘   │  │
 │                           └─────────────────────────┘  │
-│                                      │                  │
-└──────────────────────────────────────┼──────────────────┘
+│                                      │                 │
+└──────────────────────────────────────┼─────────────────┘
                                        │
                                        ▼
                               ┌─────────────────┐
@@ -167,211 +167,213 @@ A containerized web application built with Bun runtime that provides automated b
 
 ### 4.1 SQLite Schema
 
-#### 4.1.1 database_configs
+#### 4.1.1 DatabaseConfig
 Stores database connection configurations.
 
 ```sql
-CREATE TABLE database_configs (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL UNIQUE,
-  type TEXT NOT NULL CHECK(type IN ('postgresql', 'mysql')),
-  host TEXT NOT NULL,
-  port INTEGER NOT NULL,
-  database_name TEXT NOT NULL,
-  username TEXT NOT NULL,
-  password_encrypted TEXT NOT NULL,
-  docker_container_name TEXT,
-  enabled BOOLEAN DEFAULT 1,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE DatabaseConfig (
+  Id TEXT PRIMARY KEY,
+  Name TEXT NOT NULL UNIQUE,
+  Type TEXT NOT NULL CHECK(Type IN ('postgresql', 'mysql')),
+  Host TEXT NOT NULL,
+  Port INTEGER NOT NULL,
+  DatabaseName TEXT NOT NULL,
+  Username TEXT NOT NULL,
+  PasswordEncrypted TEXT NOT NULL,
+  DockerContainerName TEXT,
+  Enabled BOOLEAN DEFAULT 1,
+  CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UpdatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_database_configs_enabled ON database_configs(enabled);
+CREATE INDEX idx_DatabaseConfigs_Enabled ON DatabaseConfigs(Enabled);
 ```
 
-#### 4.1.2 backup_schedules
+#### 4.1.2 BackupSchedule
 Defines backup schedules for databases.
 
 ```sql
-CREATE TABLE backup_schedules (
-  id TEXT PRIMARY KEY,
-  database_config_id TEXT NOT NULL,
-  schedule_type TEXT NOT NULL CHECK(schedule_type IN ('hourly', 'daily', 'weekly', 'monthly', 'custom')),
-  cron_expression TEXT NOT NULL,
-  enabled BOOLEAN DEFAULT 1,
-  s3_upload_enabled BOOLEAN DEFAULT 1,
-  retention_policy_id TEXT,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (database_config_id) REFERENCES database_configs(id) ON DELETE CASCADE,
-  FOREIGN KEY (retention_policy_id) REFERENCES retention_policies(id)
+CREATE TABLE BackupSchedule (
+  Id TEXT PRIMARY KEY,
+  DatabaseConfigId TEXT NOT NULL,
+  ScheduleType TEXT NOT NULL CHECK(ScheduleType IN ('hourly', 'daily', 'weekly', 'monthly', 'custom')),
+  CronExpression TEXT NOT NULL,
+  Enabled BOOLEAN DEFAULT 1,
+  S3UploadEnabled BOOLEAN DEFAULT 1,
+  RetentionPolicyId TEXT,
+  CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UpdatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (DatabaseConfigId) REFERENCES DatabaseConfigs(Id) ON DELETE CASCADE,
+  FOREIGN KEY (RetentionPolicyId) REFERENCES RetentionPolicies(Id)
 );
 
-CREATE INDEX idx_backup_schedules_database ON backup_schedules(database_config_id);
-CREATE INDEX idx_backup_schedules_enabled ON backup_schedules(enabled);
+CREATE INDEX idx_BackupSchedules_Database ON BackupSchedules(DatabaseConfigId);
+CREATE INDEX idx_BackupSchedules_Enabled ON BackupSchedules(Enabled);
 ```
 
-#### 4.1.3 retention_policies
+#### 4.1.3 RetentionPolicy
 Defines hierarchical retention rules.
 
 ```sql
-CREATE TABLE retention_policies (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  description TEXT,
+CREATE TABLE RetentionPolicy (
+  Id TEXT PRIMARY KEY,
+  Name TEXT NOT NULL,
+  Description TEXT,
   -- Retention counts
-  keep_hourly INTEGER DEFAULT 24,
-  keep_daily INTEGER DEFAULT 7,
-  keep_weekly INTEGER DEFAULT 4,
-  keep_monthly INTEGER DEFAULT 12,
-  keep_yearly INTEGER DEFAULT 0,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  KeepHourly INTEGER DEFAULT 24,
+  KeepDaily INTEGER DEFAULT 7,
+  KeepWeekly INTEGER DEFAULT 4,
+  KeepMonthly INTEGER DEFAULT 12,
+  KeepYearly INTEGER DEFAULT 0,
+  CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UpdatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 ```
 
-#### 4.1.4 backup_executions
+#### 4.1.4 BackupExecutions
 Records each backup execution.
 
 ```sql
-CREATE TABLE backup_executions (
-  id TEXT PRIMARY KEY,
-  database_config_id TEXT NOT NULL,
-  backup_schedule_id TEXT,
-  backup_type TEXT NOT NULL CHECK(backup_type IN ('hourly', 'daily', 'weekly', 'monthly', 'manual')),
-  status TEXT NOT NULL CHECK(status IN ('running', 'completed', 'failed', 'cancelled')),
+CREATE TABLE BackupExecution (
+  Id TEXT PRIMARY KEY,
+  DatabaseConfigId TEXT NOT NULL,
+  BackupScheduleId TEXT,
+  BackupType TEXT NOT NULL CHECK(BackupType IN ('hourly', 'daily', 'weekly', 'monthly', 'manual')),
+  Status TEXT NOT NULL CHECK(Status IN ('running', 'completed', 'failed', 'cancelled')),
 
   -- File information
-  file_name TEXT,
-  file_size_bytes INTEGER,
-  local_path TEXT,
+  FileName TEXT,
+  FileSizeBytes INTEGER,
+  LocalPath TEXT,
 
   -- S3 information
-  s3_uploaded BOOLEAN DEFAULT 0,
-  s3_bucket TEXT,
-  s3_key TEXT,
-  s3_upload_at DATETIME,
+  S3Uploaded BOOLEAN DEFAULT 0,
+  S3Bucket TEXT,
+  S3Key TEXT,
+  S3UploadAt DATETIME,
 
   -- Timing
-  started_at DATETIME NOT NULL,
-  completed_at DATETIME,
-  duration_seconds INTEGER,
+  StartedAt DATETIME NOT NULL,
+  CompletedAt DATETIME,
+  DurationSeconds INTEGER,
 
   -- Error tracking
-  error_message TEXT,
-  error_stack TEXT,
+  ErrorMessage TEXT,
+  ErrorStack TEXT,
 
   -- Metadata
-  database_size_bytes INTEGER,
-  compression_used TEXT,
-  checksum TEXT,
+  DatabaseSizeBytes INTEGER,
+  CompressionUsed TEXT,
+  Checksum TEXT,
 
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
 
-  FOREIGN KEY (database_config_id) REFERENCES database_configs(id) ON DELETE CASCADE,
-  FOREIGN KEY (backup_schedule_id) REFERENCES backup_schedules(id) ON DELETE SET NULL
+  FOREIGN KEY (DatabaseConfigId) REFERENCES DatabaseConfigs(Id) ON DELETE CASCADE,
+  FOREIGN KEY (BackupScheduleId) REFERENCES BackupSchedules(Id) ON DELETE SET NULL
 );
 
-CREATE INDEX idx_backup_executions_database ON backup_executions(database_config_id);
-CREATE INDEX idx_backup_executions_status ON backup_executions(status);
-CREATE INDEX idx_backup_executions_type ON backup_executions(backup_type);
-CREATE INDEX idx_backup_executions_started ON backup_executions(started_at DESC);
-CREATE INDEX idx_backup_executions_s3 ON backup_executions(s3_bucket, s3_key) WHERE s3_uploaded = 1;
+CREATE INDEX idx_BackupExecutions_Database ON BackupExecutions(DatabaseConfigId);
+CREATE INDEX idx_BackupExecutions_Status ON BackupExecutions(Status);
+CREATE INDEX idx_BackupExecutions_Type ON BackupExecutions(BackupType);
+CREATE INDEX idx_BackupExecutions_Started ON BackupExecutions(StartedAt DESC);
+CREATE INDEX idx_BackupExecutions_S3 ON BackupExecutions(S3Bucket, S3Key) WHERE S3Uploaded = 1;
 ```
 
-#### 4.1.5 restore_executions
+#### 4.1.5 RestoreExecutions
 Records database restore operations.
 
 ```sql
-CREATE TABLE restore_executions (
-  id TEXT PRIMARY KEY,
-  database_config_id TEXT NOT NULL,
-  backup_execution_id TEXT,
+CREATE TABLE RestoreExecution (
+  Id TEXT PRIMARY KEY,
+  DatabaseConfigId TEXT NOT NULL,
+  BackupExecutionId TEXT,
 
-  status TEXT NOT NULL CHECK(status IN ('running', 'completed', 'failed', 'cancelled')),
+  Status TEXT NOT NULL CHECK(Status IN ('running', 'completed', 'failed', 'cancelled')),
 
   -- Source information
-  source_type TEXT NOT NULL CHECK(source_type IN ('local', 's3', 'upload')),
-  source_path TEXT,
-  s3_bucket TEXT,
-  s3_key TEXT,
+  SourceType TEXT NOT NULL CHECK(SourceType IN ('local', 's3', 'upload')),
+  SourcePath TEXT,
+  S3Bucket TEXT,
+  S3Key TEXT,
 
   -- Restore options
-  restore_options TEXT, -- JSON
+  RestoreOptions TEXT, -- JSON
 
   -- Timing
-  started_at DATETIME NOT NULL,
-  completed_at DATETIME,
-  duration_seconds INTEGER,
+  StartedAt DATETIME NOT NULL,
+  CompletedAt DATETIME,
+  DurationSeconds INTEGER,
 
   -- Error tracking
-  error_message TEXT,
-  error_stack TEXT,
+  ErrorMessage TEXT,
+  ErrorStack TEXT,
 
   -- User tracking
-  initiated_by TEXT,
+  InitiatedBy TEXT,
 
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
 
-  FOREIGN KEY (database_config_id) REFERENCES database_configs(id) ON DELETE CASCADE,
-  FOREIGN KEY (backup_execution_id) REFERENCES backup_executions(id) ON DELETE SET NULL
+  FOREIGN KEY (DatabaseConfigId) REFERENCES DatabaseConfigs(Id) ON DELETE CASCADE,
+  FOREIGN KEY (BackupExecutionId) REFERENCES BackupExecutions(Id) ON DELETE SET NULL
 );
 
-CREATE INDEX idx_restore_executions_database ON restore_executions(database_config_id);
-CREATE INDEX idx_restore_executions_started ON restore_executions(started_at DESC);
+CREATE INDEX idx_RestoreExecutionDatabase ON RestoreExecution(DatabaseConfigId);
+CREATE INDEX idx_RestoreExecutionStarted ON RestoreExecution(StartedAt DESC);
 ```
 
-#### 4.1.6 execution_logs
+#### 4.1.6 ExecutionLogs
 Detailed logs for backup and restore operations.
 
 ```sql
-CREATE TABLE execution_logs (
-  id TEXT PRIMARY KEY,
-  execution_id TEXT NOT NULL,
-  execution_type TEXT NOT NULL CHECK(execution_type IN ('backup', 'restore')),
-  log_level TEXT NOT NULL CHECK(log_level IN ('debug', 'info', 'warn', 'error')),
-  message TEXT NOT NULL,
-  metadata TEXT, -- JSON
-  timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE ExecutionLog (
+  Id TEXT PRIMARY KEY,
+  ExecutionId TEXT NOT NULL,
+  ExecutionType TEXT NOT NULL CHECK(ExecutionType IN ('backup', 'restore')),
+  LogLevel TEXT NOT NULL CHECK(LogLevel IN ('debug', 'info', 'warn', 'error')),
+  Message TEXT NOT NULL,
+  Metadata TEXT, -- JSON
+  Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_execution_logs_execution ON execution_logs(execution_id, timestamp);
-CREATE INDEX idx_execution_logs_level ON execution_logs(log_level);
+CREATE INDEX idx_ExecutionLogExecution ON ExecutionLog(ExecutionId, Timestamp);
+CREATE INDEX idx_ExecutionLogLevel ON ExecutionLog(LogLevel);
 ```
 
-#### 4.1.7 s3_configs
+#### 4.1.7 S3Configs
+
 S3 connection configurations.
 
 ```sql
-CREATE TABLE s3_configs (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  region TEXT NOT NULL,
-  bucket TEXT NOT NULL,
-  access_key_id_encrypted TEXT NOT NULL,
-  secret_access_key_encrypted TEXT NOT NULL,
-  endpoint TEXT, -- For S3-compatible services
-  path_prefix TEXT DEFAULT '',
-  enabled BOOLEAN DEFAULT 1,
-  is_default BOOLEAN DEFAULT 0,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE S3Config (
+  Id TEXT PRIMARY KEY,
+  Name TEXT NOT NULL,
+  Region TEXT NOT NULL,
+  Bucket TEXT NOT NULL,
+  AccessKeyIdEncrypted TEXT NOT NULL,
+  SecretAccessKeyEncrypted TEXT NOT NULL,
+  Endpoint TEXT, -- For S3-compatible services
+  PathPrefix TEXT DEFAULT '',
+  Enabled BOOLEAN DEFAULT 1,
+  IsDefault BOOLEAN DEFAULT 0,
+  CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UpdatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_s3_configs_enabled ON s3_configs(enabled);
-CREATE INDEX idx_s3_configs_default ON s3_configs(is_default) WHERE is_default = 1;
+CREATE INDEX idx_S3ConfigEnabled ON S3Config(Enabled);
+CREATE INDEX idx_S3ConfigDefault ON S3Config(IsDefault) WHERE IsDefault = 1;
 ```
 
-#### 4.1.8 system_settings
+#### 4.1.8 SystemSettings
+
 Application-wide settings.
 
 ```sql
-CREATE TABLE system_settings (
-  key TEXT PRIMARY KEY,
-  value TEXT NOT NULL,
-  value_type TEXT NOT NULL CHECK(value_type IN ('string', 'number', 'boolean', 'json')),
-  description TEXT,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE SystemSettings (
+  Key TEXT PRIMARY KEY,
+  Value TEXT NOT NULL,
+  ValueType TEXT NOT NULL CHECK(ValueType IN ('string', 'number', 'boolean', 'json')),
+  Description TEXT,
+  UpdatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 ```
 
