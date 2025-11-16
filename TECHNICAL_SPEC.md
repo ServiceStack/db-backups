@@ -1,8 +1,12 @@
 # Database Backup & Restore Web Application - Technical Specification
 
-**Version:** 1.0
+**Version:** 1.1
 **Date:** 2025-11-16
 **Status:** Draft
+
+**Changelog:**
+- v1.1 (2025-11-16): Updated to use Bun runtime and bun:sqlite instead of Node.js and better-sqlite3
+- v1.0 (2025-11-16): Initial technical specification
 
 ---
 
@@ -28,7 +32,7 @@
 ## 1. Executive Summary
 
 ### 1.1 Purpose
-A containerized web application that provides automated backup and restore capabilities for PostgreSQL and MySQL databases, designed to run as a companion container in existing Docker Compose environments.
+A containerized web application built with Bun runtime that provides automated backup and restore capabilities for PostgreSQL and MySQL databases, designed to run as a companion container in existing Docker Compose environments.
 
 ### 1.2 Goals
 - Zero-config integration with existing Docker Compose stacks
@@ -104,6 +108,7 @@ A containerized web application that provides automated backup and restore capab
   - Backup history and metadata
   - Job execution logs
   - System settings
+- **Database Driver**: Bun's native `bun:sqlite` module for high-performance database access
 
 #### 2.2.4 Storage Layer
 - **Local Storage**: Temporary backup files before S3 upload
@@ -127,11 +132,11 @@ A containerized web application that provides automated backup and restore capab
 ### 3.2 Backend
 | Technology | Version | Purpose |
 |------------|---------|---------|
-| Node.js | 22+ LTS | Runtime environment |
+| Bun | 1.1+ | JavaScript runtime environment |
 | Next.js API Routes | 16+ | Backend API |
-| node-cron | Latest | Job scheduling |
+| node-cron | Latest | Job scheduling (Bun compatible) |
 | AWS SDK v3 | Latest | S3 integration |
-| better-sqlite3 | Latest | SQLite driver |
+| bun:sqlite | Built-in | SQLite driver (Bun's native module) |
 | winston | Latest | Application logging |
 
 ### 3.3 Database Tools
@@ -147,6 +152,14 @@ A containerized web application that provides automated backup and restore capab
 | Docker | Containerization |
 | Docker Compose | Multi-container orchestration |
 | Alpine Linux | Base image (minimal footprint) |
+
+### 3.5 Bun Runtime Benefits
+- **Performance**: Faster startup times and reduced memory footprint compared to Node.js
+- **Native SQLite**: Built-in `bun:sqlite` module with superior performance and type safety
+- **TypeScript Support**: Native TypeScript execution without transpilation overhead
+- **Next.js Compatibility**: Full compatibility with Next.js 16+ for SSR/SSG
+- **Package Management**: Fast dependency installation with `bun install`
+- **Bundler**: Built-in bundler for optimized production builds
 
 ---
 
@@ -1061,23 +1074,22 @@ backups/myapp_db/2025/11/myapp_db_daily_20251116_143022.sql.gz
 #### 8.1.1 Dockerfile
 
 ```dockerfile
-FROM node:22-alpine AS base
+FROM oven/bun:1-alpine AS base
 
 # Install system dependencies
 RUN apk add --no-cache \
     postgresql16-client \
     mysql-client \
-    sqlite \
     gzip \
     curl
 
 # Build stage
 FROM base AS builder
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci
+COPY package.json bun.lockb ./
+RUN bun install --frozen-lockfile
 COPY . .
-RUN npm run build
+RUN bun run build
 
 # Production stage
 FROM base AS runner
@@ -1085,17 +1097,17 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-RUN addgroup --system --gid 1001 nodejs
+RUN addgroup --system --gid 1001 bunuser
 RUN adduser --system --uid 1001 nextjs
 
 # Copy built application
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=builder --chown=nextjs:bunuser /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:bunuser /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:bunuser /app/public ./public
 
 # Create directories for data
 RUN mkdir -p /app/data/backups /app/data/db && \
-    chown -R nextjs:nodejs /app/data
+    chown -R nextjs:bunuser /app/data
 
 USER nextjs
 
@@ -1104,7 +1116,7 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+CMD ["bun", "run", "server.js"]
 ```
 
 ### 8.2 Docker Compose Integration
@@ -1399,6 +1411,7 @@ Encrypted fields:
 
 #### 10.2.2 Storage Optimization
 - SQLite WAL mode for concurrent reads
+- Bun's native `bun:sqlite` module provides superior performance over Node.js drivers
 - Index optimization
 - Regular VACUUM operations
 
@@ -1665,7 +1678,7 @@ Optional `config.json` for advanced settings:
 ### 13.5 Security Testing
 
 #### 13.5.1 Vulnerability Scanning
-- Dependency scanning (npm audit)
+- Dependency scanning (bun audit or npm audit)
 - Container scanning
 - OWASP Top 10 testing
 
@@ -1877,11 +1890,12 @@ Optional `config.json` for advanced settings:
 - Next.js 16: https://nextjs.org/docs
 - React 19: https://react.dev
 - Tailwind CSS v4: https://tailwindcss.com/docs
+- Bun Runtime: https://bun.sh/docs
+- Bun SQLite: https://bun.sh/docs/api/sqlite
 - PostgreSQL Documentation: https://www.postgresql.org/docs/
 - MySQL Documentation: https://dev.mysql.com/doc/
 - AWS SDK for JavaScript: https://docs.aws.amazon.com/sdk-for-javascript/
 - Docker Documentation: https://docs.docker.com/
-- Node.js Documentation: https://nodejs.org/docs/
 
 ### 18.2 Best Practices
 - 12-Factor App: https://12factor.net/
