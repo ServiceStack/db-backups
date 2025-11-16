@@ -39,6 +39,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
+.env
 .env.local
 .env.development.local
 .env.test.local
@@ -51,3 +52,14 @@ obj/
 bin/
 MyApp/mise.toml
 mise.toml
+
+# Bun
+bun.lockb
+
+# Application data
+data/
+
+# Backup files
+*.dump
+*.dump.gz
+*.sql.gz
